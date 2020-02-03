@@ -4,7 +4,7 @@
 # %matplotlib inline
 
 from TrafficEnv import *
-from DQNAgent import *
+from DQNAgent import DQNAgent
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -29,10 +29,8 @@ episode_end = []
 ################################
 
 
-env = TrafficEnv('')
+env = TrafficEnv('gui')
 agent = DQNAgent(STATE_DIM, ACTION_DIM)
-#agent.model.load_weights('saved_model_full.h5')
-
 
 for episode in range(MAX_EPISODES):
 

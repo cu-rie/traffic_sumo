@@ -1,15 +1,19 @@
-
-
 import numpy as np
-import traci
 
+import os, sys
+
+sumo_dir = 'C:\Program Files (x86)\Eclipse\Sumo'
+tools = os.path.join(sumo_dir, 'tools')
+sys.path.append(tools)
+
+import traci
 
 
 class TrafficEnv:
 
     def __init__(self, mode):
 
-        #------ Define SUMO directories
+        # ------ Define SUMO directories
         if str(mode) == 'gui':
             self.sumoBinary = "D:/SUMO/bin/sumo-gui"
         else:
@@ -17,7 +21,7 @@ class TrafficEnv:
         self.cfgBinary = "tutorial.sumocfg"
         self.sumoCmd = [self.sumoBinary, "-c", self.cfgBinary]
 
-        #------ Simulation setup
+        # ------ Simulation setup
         ##-- Geometric properties
         self.edgeId = ["3to1", "5to1", "4to1", "2to1"]
         self.outEdgeId = ["1to5", "1to3", "1to2", "1to4"]
@@ -47,19 +51,13 @@ class TrafficEnv:
         self.periodicState = np.zeros((self.cycle, self.stateDim))
         self.state = None
 
-
-
-
-
     def startSUMO(self):
         traci.start(self.sumoCmd)
         self.timestep = -1
 
-
     def endSUMO(self):
         traci.close()
         self.timesetp = -1
-
 
     def stepSimulation(self):
         '''
@@ -67,7 +65,6 @@ class TrafficEnv:
         '''
         traci.simulationStep()
         self.timestep += 1
-
 
     def reset(self):
         '''
@@ -94,8 +91,6 @@ class TrafficEnv:
 
         return self.state
 
-
-
     def step(self, action):
         '''
         Proceed one step of Traffic simulation with given action
@@ -107,10 +102,10 @@ class TrafficEnv:
 
         for t in range(self.cycle):
 
-            #-- Proceeding one timestep
+            # -- Proceeding one timestep
             self.stepSimulation()
 
-            #-- Get Instant Queues regarding to the signal phase
+            # -- Get Instant Queues regarding to the signal phase
             phase = traci.trafficlight.getPhase(self.nodeId[0])
             tmpQ = self.getInstantQs()
             if phase == 1:
@@ -119,10 +114,10 @@ class TrafficEnv:
                 tmpQ[0:2] = [-1, -1]
             prdState[t, :] = tmpQ
 
-            #-- Get outflow vehicles
+            # -- Get outflow vehicles
             self.getDetectingInfo()
 
-        #-- Get Next state
+        # -- Get Next state
         nextState = self.getMaxQs(prdState)
 
         # Get terminal
@@ -138,11 +133,7 @@ class TrafficEnv:
         # Updating the currentState
         self.state = nextState
 
-
         return nextState, reward, terminal
-
-
-
 
     def setSignalProgram(self):
         '''
@@ -151,16 +142,16 @@ class TrafficEnv:
         yellow time is set up to be 3 sec in default
         and offset is set to be zero
         '''
-        #-- Initial Random signal
+        # -- Initial Random signal
         rdmRatio = round(np.random.uniform(0.2, 0.8, 1)[0], 1)
         greentime_NS = int(round(self.cycle * rdmRatio * 1000)) - 3000
-        greentime_EW = int(self.cycle * 1000 - (greentime_NS + 3000)) -3000
+        greentime_EW = int(self.cycle * 1000 - (greentime_NS + 3000)) - 3000
 
         phase = []
-        phase.append(traci.trafficlight.Phase(3000, 0, 0, "rrryyyrrryyy"))             # phase : 3 (EW-yellow)
-        phase.append(traci.trafficlight.Phase(greentime_NS, 0, 0, "GGGrrrGGGrrr"))     # phase : 0 (NS-green)
-        phase.append(traci.trafficlight.Phase(3000, 0, 0, "yyyrrryyyrrr"))             # phase : 1 (NS-yellow)
-        phase.append(traci.trafficlight.Phase(greentime_EW, 0, 0, "rrrGGGrrrGGG"))     # phase : 2 (EW-green)
+        phase.append(traci.trafficlight.Phase(3000, 0, 0, "rrryyyrrryyy"))  # phase : 3 (EW-yellow)
+        phase.append(traci.trafficlight.Phase(greentime_NS, 0, 0, "GGGrrrGGGrrr"))  # phase : 0 (NS-green)
+        phase.append(traci.trafficlight.Phase(3000, 0, 0, "yyyrrryyyrrr"))  # phase : 1 (NS-yellow)
+        phase.append(traci.trafficlight.Phase(greentime_EW, 0, 0, "rrrGGGrrrGGG"))  # phase : 2 (EW-green)
 
         programId = 'Initial'
         logic = traci.trafficlight.Logic(programId, 0, 0, 0, phase)
@@ -169,20 +160,18 @@ class TrafficEnv:
 
         for action in range(0, 4):
             gr = round((action + 1) * 0.2, 1)
-            greentime_NS = int(round(self.cycle * gr * 1000)) - 3000                # Phase number : 0 // yellow time : 1
-            greentime_EW = int(self.cycle * 1000 - (greentime_NS + 3000)) - 3000    # Phase number : 2 // yellow time : 3
+            greentime_NS = int(round(self.cycle * gr * 1000)) - 3000  # Phase number : 0 // yellow time : 1
+            greentime_EW = int(self.cycle * 1000 - (greentime_NS + 3000)) - 3000  # Phase number : 2 // yellow time : 3
 
             phase = []
-            phase.append(traci.trafficlight.Phase(3000, 0, 0, "rrryyyrrryyy"))             # phase : 3 (EW-yellow)
-            phase.append(traci.trafficlight.Phase(greentime_NS, 0, 0, "GGGrrrGGGrrr"))     # phase : 0 (NS-green)
-            phase.append(traci.trafficlight.Phase(3000, 0, 0, "yyyrrryyyrrr"))             # phase : 1 (NS-yellow)
-            phase.append(traci.trafficlight.Phase(greentime_EW, 0, 0, "rrrGGGrrrGGG"))     # phase : 2 (EW-green)
+            phase.append(traci.trafficlight.Phase(3000, 0, 0, "rrryyyrrryyy"))  # phase : 3 (EW-yellow)
+            phase.append(traci.trafficlight.Phase(greentime_NS, 0, 0, "GGGrrrGGGrrr"))  # phase : 0 (NS-green)
+            phase.append(traci.trafficlight.Phase(3000, 0, 0, "yyyrrryyyrrr"))  # phase : 1 (NS-yellow)
+            phase.append(traci.trafficlight.Phase(greentime_EW, 0, 0, "rrrGGGrrrGGG"))  # phase : 2 (EW-green)
 
             programId = ''.join(['action-', str(gr)])
             logic = traci.trafficlight.Logic(programId, 0, 0, 0, phase)
             traci.trafficlight.setCompleteRedYellowGreenDefinition(self.nodeId[0], logic)
-
-
 
     def getInstantQs(self):
         '''
@@ -206,8 +195,6 @@ class TrafficEnv:
 
         return edgeQs
 
-
-
     def getMaxQs(self, periodicState):
         '''
         Return maximum column element from (timestep * stateDim) matrix
@@ -219,21 +206,16 @@ class TrafficEnv:
 
         return maxQs
 
-
-
-
     def setAction(self, action):
         '''
         Set signal program which is predefined in self.setSignalProgram
         '''
         program = self.signalProgram[action]
-        traci.trafficlight.setProgram(self.nodeId[0], program)     # '1' is the node name located on the center of the intersection
+        traci.trafficlight.setProgram(self.nodeId[0],
+                                      program)  # '1' is the node name located on the center of the intersection
 
         # -- Get the current Signal program information
         self.currentProgram = traci.trafficlight.getProgram(self.nodeId[0])
-
-
-
 
     def getReward(self):
         '''
@@ -243,7 +225,6 @@ class TrafficEnv:
         score = 0
 
         for i in range(len(self.edgeId)):
-
             capa = self.linkCapacityPerLane * self.numLanes[i] * self.cycle / 3600
             counting = len(list(set(self.outVehIDs[i])))
 
@@ -253,9 +234,6 @@ class TrafficEnv:
             score = 1
 
         return score
-
-
-
 
     def getTerminal(self, nextState):
 
@@ -268,8 +246,6 @@ class TrafficEnv:
             terminal = False
 
         return terminal
-
-
 
     def getDetectingInfo(self):
         '''
