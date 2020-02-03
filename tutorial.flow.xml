@@ -1,0 +1,9 @@
+<flows>
+	<vType accel="1.0" decel="5.0" id="Car" length="5.0" maxSpeed="50.0" sigma="0.45" />
+		<interval begin="0" end="3960">
+			<flow id="1" from="4to1" to="1to2" number="4000"/>
+			<flow id="2" from="2to1" to="1to4" number="4000"/>
+			<flow id="3" from="5to1" to="1to3" number="500"/>
+			<flow id="4" from="3to1" to="1to5" number="500"/>
+		</interval>
+</flows>
