@@ -49,7 +49,7 @@ for episode in range(MAX_EPISODES):
         currentState = nextState
         accumulatedRewards += reward
 
-        if terminal == True or t == (MAX_EP_STEPS - 1):
+        if terminal or t == (MAX_EP_STEPS - 1):
             agent.update_target_model()
             rewards.append(accumulatedRewards)
             episode_end.append(t)
@@ -57,7 +57,7 @@ for episode in range(MAX_EPISODES):
             env.endSUMO()
             env.timestep = -1
             print("[Episode : ", episode, "]  Rewards : %.4f" % accumulatedRewards, "Epsilon : %.3f" % agent.epsilon,
-                  "Avg action : %.3f" % np.mean(actions[0:t, episode]), "timestep : ", t)
+                  "timestep : ", t)
             break
 
     if len(rewards) > 51 and np.mean(rewards[(len(rewards) - min(50, len(rewards))): len(rewards)]) > 19:
