@@ -2,9 +2,9 @@ import numpy as np
 
 import os, sys
 
-sumo_dir = 'C:\Program Files (x86)\Eclipse\Sumo'
-tools = os.path.join(sumo_dir, 'tools')
-sys.path.append(tools)
+# sumo_dir = 'C:\Program Files (x86)\Eclipse\Sumo'
+# tools = os.path.join(sumo_dir, 'tools')
+# sys.path.append(tools)
 
 import traci
 
@@ -15,9 +15,9 @@ class TrafficEnv:
 
         # ------ Define SUMO directories
         if str(mode) == 'gui':
-            self.sumoBinary = "D:/SUMO/bin/sumo-gui"
+            self.sumoBinary = "F:/SUMO/bin/sumo-gui"
         else:
-            self.sumoBinary = "D:/SUMO/bin/sumo.exe"
+            self.sumoBinary = "F:/SUMO/bin/sumo.exe"
         self.cfgBinary = "tutorial.sumocfg"
         self.sumoCmd = [self.sumoBinary, "-c", self.cfgBinary]
 
