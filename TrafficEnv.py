@@ -16,8 +16,10 @@ class TrafficEnv:
         # ------ Define SUMO directories
         if str(mode) == 'gui':
             self.sumoBinary = "F:/SUMO/bin/sumo-gui"
+            # self.sumoBinary = "F:/SUMO/bin/sumo-gui"
         else:
             self.sumoBinary = "F:/SUMO/bin/sumo.exe"
+            # self.sumoBinary = "F:/SUMO/bin/sumo.exe"
         self.cfgBinary = "tutorial.sumocfg"
         self.sumoCmd = [self.sumoBinary, "-c", self.cfgBinary]
 
@@ -40,6 +42,7 @@ class TrafficEnv:
 
         ##-- Simulation time setup
         self.timestep = None
+        # self.warmupTime = 10
         self.warmupTime = 360
 
         ##-- Traffic Parameters

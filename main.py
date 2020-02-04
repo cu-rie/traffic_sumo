@@ -1,5 +1,3 @@
-
-
 ##### Importing Modules #####
 # %matplotlib inline
 
@@ -8,9 +6,9 @@ from DQNAgent import DQNAgent
 
 import numpy as np
 import matplotlib.pyplot as plt
+
 # import pandas as pd
 ################################
-
 
 
 ##### Experiment Setup #######
@@ -21,7 +19,6 @@ MAX_EP_STEPS = 40
 STATE_DIM = 4
 ACTION_DIM = 4
 
-
 avgRange = 10
 rewards = []
 episode_end = []
@@ -29,7 +26,7 @@ episode_end = []
 ################################
 
 
-env = TrafficEnv('gui')
+env = TrafficEnv('')
 agent = DQNAgent(STATE_DIM, ACTION_DIM)
 
 for episode in range(MAX_EPISODES):
@@ -46,7 +43,6 @@ for episode in range(MAX_EPISODES):
 
         agent.append_sample(currentState, currentAction, reward, terminal, nextState)
 
-
         if len(agent.memory) >= agent.train_start:
             agent.train_model()
 
@@ -60,35 +56,33 @@ for episode in range(MAX_EPISODES):
 
             env.endSUMO()
             env.timestep = -1
-            print("[Episode : ", episode, "]  Rewards : %.4f" % accumulatedRewards, "Epsilon : %.3f" % agent.epsilon, "Avg action : %.3f" % np.mean(actions[0:t, episode]), "timestep : ", t)
+            print("[Episode : ", episode, "]  Rewards : %.4f" % accumulatedRewards, "Epsilon : %.3f" % agent.epsilon,
+                  "Avg action : %.3f" % np.mean(actions[0:t, episode]), "timestep : ", t)
             break
 
-    if len(rewards) > 51 and np.mean(rewards[(len(rewards) - min(50, len(rewards))) : len(rewards)]) > 19:
+    if len(rewards) > 51 and np.mean(rewards[(len(rewards) - min(50, len(rewards))): len(rewards)]) > 19:
         name = "saved_model_" + str(episode) + ".h5"
         agent.model.save_weights(name)
 
-
 agent.model.save_weights('saved_model_full.h5')
-
-
 
 ##### Draw the graph to test the convergence #####
 smoothedRewards = np.copy(rewards)
 for i in range(avgRange, episode):
-    smoothedRewards[i] = np.mean(rewards[i - avgRange : i + 1])
+    smoothedRewards[i] = np.mean(rewards[i - avgRange: i + 1])
 
 plt.figure(1)
-plt.plot(smoothedRewards, label = 'Smoothed rewards', linewidth = 2.2)
-plt.plot(rewards, label = 'episodic rewards', alpha = 0.2)
+plt.plot(smoothedRewards, label='Smoothed rewards', linewidth=2.2)
+plt.plot(rewards, label='episodic rewards', alpha=0.2)
 plt.xlabel('Episodes')
 plt.ylabel('Accumulated Rewards')
 plt.legend()
 ##################################################
 
 
-
 ##### Export the Total episodic rewards #####
 import csv
+
 f = open('rewards.csv', 'w')
 for i in range(len(rewards)):
     f.write(str(rewards[i]))

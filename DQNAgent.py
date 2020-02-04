@@ -36,7 +36,7 @@ class DQNAgent(nn.Module):
                                 hidden_activation=hidden_activation, out_activation=None)
 
         # Initialization of the model
-        self.update_target(self.model, self.target_model)
+        self.update_target_model(self.model, self.target_model)
 
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.alpha)
 
@@ -53,8 +53,11 @@ class DQNAgent(nn.Module):
             q_values = self.model(state)
             return np.argmax(q_values[0])
 
-    @staticmethod
-    def update_target(source, target, tau: float = 1.0):
+    def update_target_model(self, source=None, target=None, tau: float = 1.0):
+        if source or target is None:
+            source = self.model
+            target = self.target_model
+
         for src_param, target_param in zip(source.parameters(), target.parameters()):
             target_param.data.copy_(tau * src_param.data + (1.0 - tau) * target_param.data)
 
