@@ -37,7 +37,7 @@ class DQNAgent:
         self.update_target_model()
 
         if self.load_model:
-            self.model.load_weights("saved_model.h5")
+            self.model.load_weights("saved_model_dqn.h5")
 
     def build_model(self):
 

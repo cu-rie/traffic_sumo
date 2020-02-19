@@ -5,6 +5,7 @@ import random
 
 from collections import deque
 from nn.MultiLayerPerceptron import MultiLayerPerceptron as MLP
+from nn.GraphLayer import RelationalGraphNetwork
 
 
 class DQNAgent(nn.Module):
@@ -19,7 +20,7 @@ class DQNAgent(nn.Module):
         # Hyper-parameters for DQN
         self.gamma = 0.99
         self.alpha = 0.001
-        self.epsilon = 1.0
+        self.epsilon = 0.01
         self.epsilon_decay = 0.995
         self.epsilon_min = 0.01
 
@@ -29,11 +30,13 @@ class DQNAgent(nn.Module):
         self.train_start = 100
 
         # Model construction
-        self.model = MLP(input_dim=state_dim, output_dim=action_dim, hidden_dim=hidden_dim,
-                         hidden_activation=hidden_activation, out_activation=None)
-
-        self.target_model = MLP(input_dim=state_dim, output_dim=action_dim, hidden_dim=hidden_dim,
-                                hidden_activation=hidden_activation, out_activation=None)
+        # self.model = MLP(input_dim=state_dim, output_dim=action_dim, hidden_dim=hidden_dim,
+        #                  hidden_activation=hidden_activation, out_activation=None)
+        #
+        # self.target_model = MLP(input_dim=state_dim, output_dim=action_dim, hidden_dim=hidden_dim,
+        #                         hidden_activation=hidden_activation, out_activation=None)
+        self.model = RelationalGraphNetwork()
+        self.target_model = RelationalGraphNetwork()
 
         # Initialization of the model
         self.update_target_model(self.model, self.target_model)
@@ -43,15 +46,17 @@ class DQNAgent(nn.Module):
     def forward(self, state):
         return self.model(state)
 
-    def get_action(self, state_):
-        state = np.reshape(state_, [1, self.state_dim])
+    def get_action(self, state):
+        # state = np.reshape(state_, [1, self.state_dim])
 
         if np.random.rand() <= self.epsilon:
             return random.randrange(self.action_dim)
 
         else:
+            # state = torch.Tensor(state)
             q_values = self.model(state)
-            return np.argmax(q_values[0])
+
+            return q_values[0].detach().numpy().argmax()
 
     def update_target_model(self, source=None, target=None, tau: float = 1.0):
         if source or target is None:
@@ -80,6 +85,13 @@ class DQNAgent(nn.Module):
             t_batch.append(batch[i][3])
             s2_batch[i] = batch[i][4]
 
+        # pytorch interaction
+        s_batch = torch.Tensor(s_batch)
+        s2_batch = torch.Tensor(s2_batch)
+        a_batch = torch.Tensor(a_batch).int()
+        r_batch = torch.Tensor(r_batch)
+        t_batch = torch.Tensor(t_batch)
+
         currentQ = self.model(s_batch)
         with torch.no_grad():
             nextQ = self.target_model(s2_batch)
@@ -89,7 +101,7 @@ class DQNAgent(nn.Module):
             if t_batch[i]:
                 y[i][a_batch[i]] = r_batch[i]
             else:
-                y[i][a_batch[i]] = r_batch[i] + self.gamma * np.amax(nextQ[i])
+                y[i][a_batch[i]] = r_batch[i] + self.gamma * torch.max(nextQ[i])
 
         # define loss
         loss = torch.nn.functional.mse_loss(s_batch, y)
@@ -98,3 +110,5 @@ class DQNAgent(nn.Module):
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
+
+        return loss.detach().data

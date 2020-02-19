@@ -45,6 +45,16 @@ def get_nn_activation(activation: 'str'):
     return act
 
 
+mlp_conf = {
+    'input_dim': 1,
+    'output_dim': 16,
+    'hidden_dim': [32, 32],
+    'hidden_activation': 'ReLU',
+    'out_activation': None,
+    'weight_init': 'normal'
+}
+
+
 class MultiLayerPerceptron(nn.Module):
 
     def __init__(self,
@@ -112,3 +122,5 @@ class MultiLayerPerceptron(nn.Module):
         else:
             raise NotImplementedError("MLP initializer {} is not supported".format(weight_init))
 
+    def save_weights(self, name):
+        torch.save(self.state_dict(), "saved_model_dqn/{}.th".format(name))
