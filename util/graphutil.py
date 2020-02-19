@@ -28,10 +28,10 @@ def state2graphfunc(state, device=None):
     num_same_edges_1 = len(edge_same_1[0])
     num_same_edges_2 = len(edge_same_2[0])
 
-    g.add_edges(edge_same_1[0], edge_same_1[1], {'edge_type': edge_same_type.repeat(num_same_edges_1, 1),
+    g.add_edges(edge_same_1[0], edge_same_1[1], {'edge_type': edge_same_type.repeat(num_same_edges_1),
                                                  'edge_one_hot': edge_same_one_hot.repeat(num_same_edges_1, 1)})
 
-    g.add_edges(edge_same_2[0], edge_same_2[1], {'edge_type': edge_same_type.repeat(num_same_edges_2, 1),
+    g.add_edges(edge_same_2[0], edge_same_2[1], {'edge_type': edge_same_type.repeat(num_same_edges_2),
                                                  'edge_one_hot': edge_same_one_hot.repeat(num_same_edges_2, 1)})
 
     # add edge connection with different signal nodes
@@ -44,10 +44,10 @@ def state2graphfunc(state, device=None):
     edge_diff_type = torch.Tensor(data=(DIFF_EDGE_TYPE,)).to(device)
     edge_diff_one_hot = torch.Tensor(get_one_hot_edge_type(DIFF_EDGE_TYPE)).to(device)
 
-    g.add_edges(edge_diff_1[0], edge_diff_1[1], {'edge_type': edge_diff_type.repeat(num_diff_edges_1, 1),
+    g.add_edges(edge_diff_1[0], edge_diff_1[1], {'edge_type': edge_diff_type.repeat(num_diff_edges_1),
                                                  'edge_one_hot': edge_diff_one_hot.repeat(num_diff_edges_1, 1)})
 
-    g.add_edges(edge_diff_2[0], edge_diff_2[1], {'edge_type': edge_diff_type.repeat(num_diff_edges_2, 1),
+    g.add_edges(edge_diff_2[0], edge_diff_2[1], {'edge_type': edge_diff_type.repeat(num_diff_edges_2),
                                                  'edge_one_hot': edge_diff_one_hot.repeat(num_diff_edges_2, 1)})
 
     return g

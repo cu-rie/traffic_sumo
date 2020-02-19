@@ -16,7 +16,7 @@ class RelationalGraphNetwork(nn.Module):
                  hidden_node_dim=32,
                  output_node_dim=1,
                  init_node_dim=1,
-                 num_hidden_layers=2,
+                 num_hidden_layers=1,
                  edge_types=[SAME_EDGE_TYPE, DIFF_EDGE_TYPE],
                  updater_conf=mlp_conf,
                  use_residual=False,
@@ -154,7 +154,7 @@ class RelationalGraphLayer(nn.Module):
             updater = self.edge_updater['updater{}'.format(i)]
 
             curr_relation_mask = edge_types == i
-            curr_relation_pos = torch.arange(src_node_features.shape[0])[curr_relation_mask.squeeze().int()]
+            curr_relation_pos = torch.arange(src_node_features.shape[0])[curr_relation_mask.squeeze()]
             if curr_relation_mask.sum() == 0:
                 msg_dict['msg_{}'.format(i)] = msg
             else:
