@@ -4,5 +4,4 @@ __pycache__/
 
 .th
 
-saved_model_dqn/
-saved_model_dqn2
+saved_model/
