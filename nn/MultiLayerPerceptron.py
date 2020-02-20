@@ -122,5 +122,5 @@ class MultiLayerPerceptron(nn.Module):
         else:
             raise NotImplementedError("MLP initializer {} is not supported".format(weight_init))
 
-    def save_weights(self, name):
-        torch.save(self.state_dict(), "saved_model_dqn/{}.th".format(name))
+    def save_weights(self, name, dir='saved_model_dqn'):
+        torch.save(self.state_dict(), "{}/{}.th".format(dir, name))

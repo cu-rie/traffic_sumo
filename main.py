@@ -68,9 +68,9 @@ for episode in range(MAX_EPISODES):
 
     if len(rewards) > 51 and np.mean(rewards[(len(rewards) - min(50, len(rewards))): len(rewards)]) > 19:
         name = "saved_model_" + str(episode)
-        agent.model.save_weights(name)
+        agent.model.save_weights(dir='saved_model_dqn2', name=name)
 
-agent.model.save_weights('saved_model_full.h5')
+agent.model.save_weights(name='saved_model_full.h5')
 
 ##### Draw the graph to test the convergence #####
 smoothedRewards = np.copy(rewards)

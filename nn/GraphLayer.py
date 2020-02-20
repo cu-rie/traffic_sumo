@@ -1,5 +1,5 @@
 import warnings
-from functools import partial
+import dgl
 
 import torch
 import torch.nn as nn
@@ -48,7 +48,15 @@ class RelationalGraphNetwork(nn.Module):
         for layer in self.layers:
             nf_out = layer(graph, nf_prev)
             nf_prev = nf_out
+
+        if type(graph) == dgl.BatchedDGLGraph:
+            n_batch = graph.batch_size
+            nf_out = nf_out.reshape(n_batch, -1)
+
         return nf_out
+
+    def save_weights(self, name, dir='saved_model_gnn'):
+        torch.save(self.state_dict(), "{}/{}.th".format(dir, name))
 
 
 class RelationalGraphLayer(nn.Module):
