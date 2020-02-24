@@ -4,8 +4,8 @@ import itertools
 import torch
 
 NUM_NODES = 4
-horizontal_nodes = [0, 2]
-vertical_nodes = [1, 3]
+horizontal_nodes = [0, 1]
+vertical_nodes = [2, 3]
 SAME_EDGE_TYPE = 0
 DIFF_EDGE_TYPE = 1
 NUM_EDGE_TYPES = 2

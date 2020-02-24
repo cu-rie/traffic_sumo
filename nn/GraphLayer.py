@@ -55,7 +55,7 @@ class RelationalGraphNetwork(nn.Module):
 
         return nf_out
 
-    def save_weights(self, name, dir='saved_model_gnn'):
+    def save_weights(self, name, dir='saved_model/gnn'):
         torch.save(self.state_dict(), "{}/{}.th".format(dir, name))
 
 

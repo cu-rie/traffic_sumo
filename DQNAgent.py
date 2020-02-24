@@ -31,13 +31,11 @@ class DQNAgent(nn.Module):
         self.train_start = 100
 
         # Model construction
-        # self.model = MLP(input_dim=state_dim, output_dim=action_dim, hidden_dim=hidden_dim,
-        #                  hidden_activation=hidden_activation, out_activation=None)
-        #
-        # self.target_model = MLP(input_dim=state_dim, output_dim=action_dim, hidden_dim=hidden_dim,
-        #                         hidden_activation=hidden_activation, out_activation=None)
-        self.model = RelationalGraphNetwork()
-        self.target_model = RelationalGraphNetwork()
+        self.model = MLP(input_dim=state_dim, output_dim=action_dim, hidden_dim=hidden_dim,
+                         hidden_activation=hidden_activation, out_activation=None)
+
+        self.target_model = MLP(input_dim=state_dim, output_dim=action_dim, hidden_dim=hidden_dim,
+                                hidden_activation=hidden_activation, out_activation=None)
 
         # Initialization of the model
         self.update_target_model(self.model, self.target_model)
@@ -54,7 +52,7 @@ class DQNAgent(nn.Module):
             return random.randrange(self.action_dim)
 
         else:
-            # state = torch.Tensor(state)
+            state = torch.Tensor(state)
             q_values = self.model(state)
 
             return q_values.argmax().int()
@@ -87,10 +85,8 @@ class DQNAgent(nn.Module):
             s2_batch.append(batch[i][4])
 
         # pytorch interaction
-        # s_batch = torch.Tensor(s_batch)
-        # s2_batch = torch.Tensor(s2_batch)
-        s_batch = dgl.batch(s_batch)
-        s2_batch = dgl.batch(s2_batch)
+        s_batch = torch.Tensor(s_batch)
+        s2_batch = torch.Tensor(s2_batch)
         a_batch = torch.Tensor(a_batch).int()
         r_batch = torch.Tensor(r_batch)
         t_batch = torch.Tensor(t_batch)

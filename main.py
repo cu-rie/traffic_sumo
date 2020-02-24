@@ -34,7 +34,7 @@ agent = DQNAgent(STATE_DIM, ACTION_DIM)
 for episode in range(MAX_EPISODES):
 
     env.startSUMO()
-    currentState = state2graphfunc(env.reset())
+    currentState = env.reset()
 
     accumulatedRewards = 0.0
     accumulatedLoss = 0.0
@@ -43,7 +43,6 @@ for episode in range(MAX_EPISODES):
 
         currentAction = agent.get_action(currentState)
         nextState, reward, terminal = env.step(currentAction)
-        nextState = state2graphfunc(nextState)
 
         agent.append_sample(currentState, currentAction, reward, terminal, nextState)
 
@@ -68,9 +67,9 @@ for episode in range(MAX_EPISODES):
 
     if len(rewards) > 51 and np.mean(rewards[(len(rewards) - min(50, len(rewards))): len(rewards)]) > 19:
         name = "saved_model_" + str(episode)
-        agent.model.save_weights(dir='saved_model_dqn2', name=name)
+        agent.model.save_weights(dir='saved_model/dqn', name=name)
 
-agent.model.save_weights(name='saved_model_full.h5')
+agent.model.save_weights(dir='saved_model/dqn', name='saved_model_full.h5')
 
 ##### Draw the graph to test the convergence #####
 smoothedRewards = np.copy(rewards)
@@ -90,7 +89,7 @@ plt.savefig('result.png')
 ##### Export the Total episodic rewards #####
 import csv
 
-f = open('saved_model_gnn/rewards.csv', 'w')
+f = open('saved_model/dqn/rewards.csv', 'w')
 for i in range(len(rewards)):
     f.write(str(rewards[i]))
     f.write(str("\n"))

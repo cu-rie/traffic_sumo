@@ -4,7 +4,8 @@ import torch.nn as nn
 import random
 
 from collections import deque
-from nn.MultiLayerPerceptron import MultiLayerPerceptron as MLP
+from nn.GraphLayer import RelationalGraphNetwork
+import dgl
 
 
 class GNNAgent(nn.Module):
@@ -29,11 +30,8 @@ class GNNAgent(nn.Module):
         self.train_start = 100
 
         # Model construction
-        self.model = MLP(input_dim=state_dim, output_dim=action_dim, hidden_dim=hidden_dim,
-                         hidden_activation=hidden_activation, out_activation=None)
-
-        self.target_model = MLP(input_dim=state_dim, output_dim=action_dim, hidden_dim=hidden_dim,
-                                hidden_activation=hidden_activation, out_activation=None)
+        self.model = RelationalGraphNetwork()
+        self.target_model = RelationalGraphNetwork()
 
         # Initialization of the model
         self.update_target_model(self.model, self.target_model)
@@ -43,17 +41,17 @@ class GNNAgent(nn.Module):
     def forward(self, state):
         return self.model(state)
 
-    def get_action(self, state_):
-        state = np.reshape(state_, [1, self.state_dim])
+    def get_action(self, state):
+        # state = np.reshape(state_, [1, self.state_dim])
 
         if np.random.rand() <= self.epsilon:
             return random.randrange(self.action_dim)
 
         else:
-            state = torch.Tensor(state)
+            # state = torch.Tensor(state)
             q_values = self.model(state)
 
-            return q_values[0].detach().numpy().argmax()
+            return q_values.argmax().int()
 
     def update_target_model(self, source=None, target=None, tau: float = 1.0):
         if source or target is None:
@@ -71,20 +69,18 @@ class GNNAgent(nn.Module):
             self.epsilon *= self.epsilon_decay
 
         batch = random.sample(self.memory, self.batch_size)
-        s_batch = np.zeros((self.batch_size, self.state_dim))
-        s2_batch = np.zeros((self.batch_size, self.state_dim))
-        a_batch, r_batch, t_batch = [], [], []
+        s_batch, s2_batch, a_batch, r_batch, t_batch = [], [], [], [], []
 
         for i in range(self.batch_size):
-            s_batch[i] = batch[i][0]
+            s_batch.append(batch[i][0])
             a_batch.append(batch[i][1])
             r_batch.append(batch[i][2])
             t_batch.append(batch[i][3])
-            s2_batch[i] = batch[i][4]
+            s2_batch.append(batch[i][4])
 
         # pytorch interaction
-        s_batch = torch.Tensor(s_batch)
-        s2_batch = torch.Tensor(s2_batch)
+        s_batch = dgl.batch(s_batch)
+        s2_batch = dgl.batch(s2_batch)
         a_batch = torch.Tensor(a_batch).int()
         r_batch = torch.Tensor(r_batch)
         t_batch = torch.Tensor(t_batch)
@@ -93,15 +89,18 @@ class GNNAgent(nn.Module):
         with torch.no_grad():
             nextQ = self.target_model(s2_batch)
 
-        y = currentQ
+        state_action_values = currentQ.gather(1, a_batch.long().reshape(-1, 1))
+
+        next_state_values = torch.zeros(self.batch_size, device=r_batch.device)
+
         for i in range(self.batch_size):
             if t_batch[i]:
-                y[i][a_batch[i]] = r_batch[i]
+                next_state_values[i] = r_batch[i]
             else:
-                y[i][a_batch[i]] = r_batch[i] + self.gamma * torch.max(nextQ[i])
+                next_state_values[i] = r_batch[i] + self.gamma * torch.max(nextQ[i])
 
         # define loss
-        loss = torch.nn.functional.mse_loss(s_batch, y)
+        loss = (state_action_values - next_state_values).pow(2).sum() / self.batch_size
 
         # optimize
         self.optimizer.zero_grad()
